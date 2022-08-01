@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title id="Description">
+      jqxScheduler widget displays a set of Appointments in Day, Week, Month,
+      Timeline Day, Timeline Week and Timeline Month views
+    </title>
+    <link rel="stylesheet" href="css/jqx.base.css" type="text/css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1 maximum-scale=1 minimum-scale=1"
+    />
+    <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="js/jqxcore.js"></script>
+    <script type="text/javascript" src="js/jqxbuttons.js"></script>
+    <script type="text/javascript" src="js/jqxscrollbar.js"></script>
+    <script type="text/javascript" src="js/jqxdata.js"></script>
+    <script type="text/javascript" src="js/jqxdate.js"></script>
+    <script type="text/javascript" src="js/jqxscheduler.js"></script>
+    <script type="text/javascript" src="js/jqxscheduler.api.js"></script>
+    <script type="text/javascript" src="js/jqxdatetimeinput.js"></script>
+    <script type="text/javascript" src="js/jqxmenu.js"></script>
+    <script type="text/javascript" src="js/jqxcalendar.js"></script>
+    <script type="text/javascript" src="js/jqxtooltip.js"></script>
+    <script type="text/javascript" src="js/jqxwindow.js"></script>
+    <script type="text/javascript" src="js/jqxcheckbox.js"></script>
+    <script type="text/javascript" src="js/jqxlistbox.js"></script>
+    <script type="text/javascript" src="js/jqxdropdownlist.js"></script>
+    <script type="text/javascript" src="js/jqxnumberinput.js"></script>
+    <script type="text/javascript" src="js/jqxradiobutton.js"></script>
+    <script type="text/javascript" src="js/jqxinput.js"></script>
+    <script type="text/javascript" src="js/globalize.js"></script>
+    <script type="text/javascript" src="js/globalize.culture.de-DE.js"></script>
+    <script type="text/javascript" src="js/demos.js"></script>
+  </head>
+  <body class="default">
+    <div id="scheduler"></div>
+
+    <script type="text/javascript">
+      $(document).ready(function () {
+        var appointments = new Array();
+        var appointment1 = {
+          id: "id1",
+          description: "George brings projector for presentations.",
+          location: "",
+          subject: "Quarterly Project Review Meeting",
+          calendar: "PM",
+          start: new Date(2022, 7, 23, 9, 0, 0),
+          end: new Date(2022, 7, 23, 16, 0, 0),
+        };
+        var appointment2 = {
+          id: "id2",
+          description: "",
+          location: "",
+          subject: "IT Group Mtg.",
+          calendar: "BM",
+          start: new Date(2022, 7, 24, 10, 0, 0),
+          end: new Date(2022, 7, 24, 15, 0, 0),
+        };
+        var appointment3 = {
+          id: "id3",
+          description: "",
+          location: "",
+          subject: "Course Social Media",
+          calendar: "BM",
+          start: new Date(2022, 7, 27, 11, 0, 0),
+          end: new Date(2022, 7, 27, 13, 0, 0),
+        };
+        var appointment4 = {
+          id: "id4",
+          description: "",
+          location: "",
+          subject: "New Projects Planning",
+          calendar: "BM",
+          start: new Date(2022, 7, 23, 16, 0, 0),
+          end: new Date(2022, 7, 23, 18, 0, 0),
+        };
+        var appointment5 = {
+          id: "id5",
+          description: "",
+          location: "",
+          subject: "Interview with James",
+          calendar: "AW",
+          start: new Date(2022, 7, 25, 15, 0, 0),
+          end: new Date(2022, 7, 25, 17, 0, 0),
+        };
+        var appointment6 = {
+          id: "id6",
+          description: "",
+          location: "",
+          subject: "Interview with Nancy",
+          calendar: "BA",
+          start: new Date(2022, 7, 26, 14, 0, 0),
+          end: new Date(2022, 7, 26, 16, 0, 0),
+        };
+        appointments.push(appointment1);
+        appointments.push(appointment2);
+        appointments.push(appointment3);
+        appointments.push(appointment4);
+        appointments.push(appointment5);
+        appointments.push(appointment6);
+        // prepare the data
+        var source = {
+          dataType: "array",
+          dataFields: [
+            { name: "id", type: "string" },
+            { name: "description", type: "string" },
+            { name: "location", type: "string" },
+            { name: "subject", type: "string" },
+            { name: "calendar", type: "string" },
+            { name: "start", type: "date" },
+            { name: "end", type: "date" },
+          ],
+          id: "id",
+          localData: appointments,
+        };
+        var adapter = new $.jqx.dataAdapter(source);
+        var today = new Date();
+        $("#scheduler").jqxScheduler({
+          date: new $.jqx.date(today.getFullYear(), today.getMonth() + 1, 01),
+          // width: getWidth('Scheduler'),
+          width: "80%",
+          height: 500,
+          source: adapter,
+          view: "monthView",
+          showLegend: true,
+          ready: function () {
+            $("#scheduler").jqxScheduler("ensureAppointmentVisible", "id3");
+          },
+          resources: {
+            colorScheme: "scheme05",
+            dataField: "calendar",
+            source: new $.jqx.dataAdapter(source),
+          },
+          appointmentDataFields: {
+            from: "start",
+            to: "end",
+            id: "id",
+            description: "description",
+            location: "location",
+            subject: "subject",
+            resourceId: "calendar",
+          },
+          views: ["dayView", "weekView", "monthView"],
+        });
+      });
+
+      $("#scheduler").on("appointmentAdd", function (event) {
+        var args = event.args;
+        var appointment = args.appointment;
+        console.log("appointmentAdd is raised");
+        // console.log(appointment.jqxAppointment);
+      });
+
+      $("#scheduler").on('editDialogClose', function (event) {
+                var args = event.args;
+                var dialog = args.dialog;
+                var appointment = args.appointment;
+                var fields = args.fields;
+                console.log(event.args);
+                console.log("editDialogClose is raised");
+            });
+
+    </script>
+  </body>
+</html>
