@@ -34,6 +34,7 @@
     <script type="text/javascript" src="js/globalize.js"></script>
     <script type="text/javascript" src="js/globalize.culture.de-DE.js"></script>
     <script type="text/javascript" src="js/demos.js"></script>
+    <script type="text/javascript" src="data.js"></script>
   </head>
   <body class="default">
     <div id="scheduler"></div>
@@ -41,66 +42,18 @@
     <script type="text/javascript">
       $(document).ready(function () {
         var appointments = new Array();
-        var appointment1 = {
-          id: "id1",
-          description: "George brings projector for presentations.",
-          location: "",
-          subject: "Quarterly Project Review Meeting",
-          calendar: "PM",
-          start: new Date(2022, 7, 23, 9, 0, 0),
-          end: new Date(2022, 7, 23, 16, 0, 0),
-        };
-        var appointment2 = {
-          id: "id2",
-          description: "",
-          location: "",
-          subject: "IT Group Mtg.",
-          calendar: "BM",
-          start: new Date(2022, 7, 24, 10, 0, 0),
-          end: new Date(2022, 7, 24, 15, 0, 0),
-        };
-        var appointment3 = {
-          id: "id3",
-          description: "",
-          location: "",
-          subject: "Course Social Media",
-          calendar: "BM",
-          start: new Date(2022, 7, 27, 11, 0, 0),
-          end: new Date(2022, 7, 27, 13, 0, 0),
-        };
-        var appointment4 = {
-          id: "id4",
-          description: "",
-          location: "",
-          subject: "New Projects Planning",
-          calendar: "BM",
-          start: new Date(2022, 7, 23, 16, 0, 0),
-          end: new Date(2022, 7, 23, 18, 0, 0),
-        };
-        var appointment5 = {
-          id: "id5",
-          description: "",
-          location: "",
-          subject: "Interview with James",
+        var ap1 = {
+          id: "2929-22-21-25-30",
+          description: "sdfsdfsdf",
+          location: "fgfdg",
+          subject: "sdfgds",
           calendar: "AW",
-          start: new Date(2022, 7, 25, 15, 0, 0),
-          end: new Date(2022, 7, 25, 17, 0, 0),
+          start: new Date(),
+          end: new Date(),
         };
-        var appointment6 = {
-          id: "id6",
-          description: "",
-          location: "",
-          subject: "Interview with Nancy",
-          calendar: "BA",
-          start: new Date(2022, 7, 26, 14, 0, 0),
-          end: new Date(2022, 7, 26, 16, 0, 0),
-        };
-        appointments.push(appointment1);
-        appointments.push(appointment2);
-        appointments.push(appointment3);
-        appointments.push(appointment4);
-        appointments.push(appointment5);
-        appointments.push(appointment6);
+
+        // appointments.push(ap1);
+        appointments = data;
         // prepare the data
         var source = {
           dataType: "array",
@@ -144,6 +97,26 @@
             resourceId: "calendar",
           },
           views: ["dayView", "weekView", "monthView"],
+          statuses: {
+            free: "red",
+            tentative: "orange",
+          },
+          localization: {
+            editDialogStatuses: {
+              free: "Free",
+              tentative: "Tentative",
+            },
+            editDialogAllDay: "All Day",
+            editDialogResourceIdString: "Workflow",
+            editDialogCreateTitleString: "Create new schedule",
+          },
+          editDialogCreate: function (dialog, fields, editAppointment) {
+                    fields.statusContainer.hide();
+                    fields.timeZoneContainer.hide();
+                    fields.colorContainer.hide();
+                    fields.allDay.val(false);
+                    fields.allDayContainer.hide();
+                },
         });
       });
 
@@ -151,18 +124,51 @@
         var args = event.args;
         var appointment = args.appointment;
         console.log("appointmentAdd is raised");
-        // console.log(appointment.jqxAppointment);
+        console.log(appointment);
+
+        if (appointment.jqxAppointment.isRecurrentAppointment()) {
+          var occurrences = appointment.jqxAppointment.getOccurrences();
+          var appointments = [];
+          for (var i = 0; i < occurrences.length; i++) {
+            var occurrence = occurrences[i];
+            appointments.push({
+              id: occurrence.id.replace(".", "_"),
+              taskId: appointment.id,
+              description: occurrence.description,
+              location: occurrence.location,
+              subject: occurrence.subject,
+              calendar: occurrence.resourceId,
+              start: new Date(
+                appointment.jqxAppointment.getOccurrences()[i].from.toDate()
+              ),
+              end: new Date(
+                appointment.jqxAppointment.getOccurrences()[i].to.toDate()
+              ),
+            });
+            console.log(occurrence);
+          }
+          download(
+            JSON.stringify(appointments),
+            "occurrences.json",
+            "text/plain"
+          );
+        } else {
+          console.log(appointment);
+          download(
+            JSON.stringify(appointment.originalData),
+            "json.json",
+            "text/plain"
+          );
+        }
       });
 
-      $("#scheduler").on('editDialogClose', function (event) {
-                var args = event.args;
-                var dialog = args.dialog;
-                var appointment = args.appointment;
-                var fields = args.fields;
-                console.log(event.args);
-                console.log("editDialogClose is raised");
-            });
-
+      function download(content, fileName, contentType) {
+        var a = document.createElement("a");
+        var file = new Blob([content], { type: contentType });
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+      }
     </script>
   </body>
 </html>
